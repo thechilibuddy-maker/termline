@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F0E8;
+    --paper-raised:#FCFBF7;
+    --ink:#1F497D;
+    --ink-soft:#4F6E96;
+    --blue:#4F81BD;
+    --blue-tint:#E4EBF4;
+    --terracotta:#B4503C;
+    --terracotta-tint:#F5E5E1;
+    --line:#D8D3C4;
+    --text:#2A2A28;
+    --text-soft:#6B6A63;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-feature-settings:'tnum' 1;
+    padding:40px 20px 80px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  header{margin-bottom:36px;}
+  h1{
+    font-family:'EB Garamond',serif;
+    font-weight:600;
+    font-size:44px;
+    color:var(--ink);
+    margin:0 0 6px;
+    letter-spacing:0.2px;
+  }
+  .tagline{
+    font-family:'EB Garamond',serif;
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:17px;
+    margin:0;
+  }
+  section{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:26px 28px;
+    margin-bottom:22px;
+  }
+  h2{
+    font-family:'EB Garamond',serif;
+    font-weight:600;
+    font-size:21px;
+    color:var(--ink);
+    margin:0 0 18px;
+    text-transform:lowercase;
+    font-variant:small-caps;
+    letter-spacing:0.3px;
+  }
+  label{
+    display:block;
+    font-size:12.5px;
+    color:var(--text-soft);
+    margin-bottom:5px;
+    font-weight:500;
+  }
+  input[type="text"], input[type="date"], input[type="number"]{
+    width:100%;
+    padding:9px 11px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fff;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    color:var(--text);
+  }
+  input:focus{outline:2px solid var(--blue);outline-offset:1px;}
+  .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+  .row.two{grid-template-columns:1fr 1fr;}
+  .field{margin-bottom:0;}
+  .item-card{
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:16px;
+    margin-bottom:12px;
+    background:#fff;
+    position:relative;
+  }
+  .item-grid{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;align-items:end;}
+  .bo-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;}
+  .remove-btn{
+    background:none;border:1px solid var(--line);color:var(--text-soft);
+    border-radius:4px;padding:8px 10px;cursor:pointer;font-size:13px;height:38px;
+  }
+  .remove-btn:hover{border-color:var(--terracotta);color:var(--terracotta);}
+  .add-btn{
+    background:var(--blue-tint);border:1px solid var(--blue);color:var(--ink);
+    border-radius:4px;padding:9px 16px;cursor:pointer;font-size:13.5px;font-weight:600;
+    margin-top:4px;
+  }
+  .add-btn:hover{background:var(--blue);color:#fff;}
+  .build-btn{
+    background:var(--ink);color:#fff;border:none;border-radius:5px;
+    padding:14px 30px;font-size:15.5px;font-weight:600;cursor:pointer;
+    font-family:'Inter',sans-serif;letter-spacing:0.2px;
+  }
+  .build-btn:hover{background:#173a63;}
+  .note{font-size:13px;color:var(--text-soft);margin-top:10px;line-height:1.5;}
+  .hint{font-size:12px;color:var(--text-soft);margin-top:-10px;margin-bottom:16px;}
+
+  /* Ruler */
+  .ruler-wrap{padding:8px 0 4px;}
+  .ruler-title{
+    font-family:'EB Garamond',serif;font-size:19px;color:var(--ink);
+    margin:0 0 4px;font-weight:600;
+  }
+  .ruler-sub{font-size:12.5px;color:var(--text-soft);margin:0 0 18px;}
+  svg{display:block;width:100%;height:auto;}
+  .legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--text-soft);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;margin-top:6px;}
+  th{
+    text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;
+    color:var(--text-soft);font-weight:600;padding:8px 10px;border-bottom:2px solid var(--line);
+  }
+  td{padding:11px 10px;border-bottom:1px solid var(--line);font-size:14px;}
+  tr.flagged td{background:var(--terracotta-tint);}
+  .flag-pill{
+    display:inline-block;background:var(--terracotta);color:#fff;font-size:11px;
+    font-weight:600;padding:3px 9px;border-radius:20px;letter-spacing:0.2px;
+  }
+  .anchor-pill{
+    display:inline-block;background:var(--blue-tint);color:var(--ink);font-size:11px;
+    font-weight:600;padding:3px 9px;border-radius:20px;
+  }
+  .pace-line{font-size:13.5px;color:var(--text);margin:0 0 4px;}
+  .pace-line b{color:var(--ink);}
+  .empty-state{color:var(--text-soft);font-size:14px;font-style:italic;}
+  #outputSection{display:none;}
+  @media (max-width:640px){
+    .row, .row.two{grid-template-columns:1fr;}
+    .item-grid{grid-template-columns:1fr;}
+    .bo-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Termline</h1>
+    <p class="tagline">Plot any course against the calendar it actually has to fit in.</p>
+  </header>
+
+  <section>
+    <h2>Course</h2>
+    <div class="row two">
+      <div class="field">
+        <label for="courseName">Course name</label>
+        <input type="text" id="courseName" placeholder="e.g. Year 8 Science">
+      </div>
+      <div class="field">
+        <label for="buffer">Buffer before final deadline (usable days)</label>
+        <input type="number" id="buffer" value="3" min="0">
+      </div>
+    </div>
+    <div class="row two">
+      <div class="field">
+        <label for="startDate">Start date</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="field">
+        <label for="finishDate">Target finish date</label>
+        <input type="date" id="finishDate">
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Blackout periods</h2>
+    <p class="hint">Any stretch with no work expected, holidays, travel, and so on. Leave empty if none.</p>
+    <div id="blackoutList"></div>
+    <button class="add-btn" onclick="addBlackout()">Add blackout period</button>
+  </section>
+
+  <section>
+    <h2>Assignments</h2>
+    <p class="hint">List them in course order. Leave "submitted date" empty for anything not yet done, that is what gets scheduled.</p>
+    <div id="assignmentList"></div>
+    <button class="add-btn" onclick="addAssignment()">Add assignment</button>
+  </section>
+
+  <div style="text-align:center;margin:30px 0;">
+    <button class="build-btn" onclick="buildSchedule()">Build schedule</button>
+  </div>
+
+  <div id="errorBox" class="note" style="color:var(--terracotta);text-align:center;"></div>
+
+  <section id="outputSection">
+    <div class="ruler-wrap">
+      <p class="ruler-title" id="rulerTitle">Termline</p>
+      <p class="ruler-sub" id="rulerSub"></p>
+      <div id="rulerSvgHolder"></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--ink);"></span>submitted</span>
+        <span><span class="dot" style="background:var(--blue);"></span>scheduled</span>
+        <span><span class="dot" style="background:var(--terracotta);"></span>pacing risk</span>
+        <span><span class="dot" style="background:var(--line);border:1px solid var(--text-soft);"></span>blackout / buffer</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="paceSection" style="display:none;">
+    <h2>Pace</h2>
+    <p class="pace-line" id="paceLine"></p>
+    <p class="pace-line" id="availLine"></p>
+  </section>
+
+  <section id="tableSection" style="display:none;">
+    <h2>Schedule</h2>
+    <table>
+      <thead>
+        <tr><th>Assignment</th><th>Topics</th><th>Status</th><th>Due date</th><th>Days allotted</th><th>Days / topic</th></tr>
+      </thead>
+      <tbody id="scheduleBody"></tbody>
+    </table>
+  </section>
+</div>
+
+<script>
+let blackoutCount = 0;
+let assignmentCount = 0;
+
+function addBlackout(prefill){
+  const id = blackoutCount++;
+  const div = document.createElement('div');
+  div.className = 'item-card';
+  div.id = 'bo-' + id;
+  div.innerHTML = `
+    <div class="bo-grid">
+      <div class="field">
+        <label>Blackout starts</label>
+        <input type="date" id="bo-start-${id}" value="${prefill && prefill[0] ? prefill[0] : ''}">
+      </div>
+      <div class="field">
+        <label>Blackout ends</label>
+        <input type="date" id="bo-end-${id}" value="${prefill && prefill[1] ? prefill[1] : ''}">
+      </div>
+      <button class="remove-btn" onclick="document.getElementById('bo-${id}').remove()">Remove</button>
+    </div>`;
+  document.getElementById('blackoutList').appendChild(div);
+}
+
+function addAssignment(prefill){
+  const id = assignmentCount++;
+  const div = document.createElement('div');
+  div.className = 'item-card';
+  div.id = 'as-' + id;
+  div.innerHTML = `
+    <div class="item-grid">
+      <div class="field">
+        <label>Assignment name</label>
+        <input type="text" id="as-name-${id}" placeholder="e.g. Module 3 assignment" value="${prefill && prefill.name ? prefill.name : ''}">
+      </div>
+      <div class="field">
+        <label>Topics</label>
+        <input type="number" id="as-topics-${id}" min="1" value="${prefill && prefill.topics ? prefill.topics : ''}">
+      </div>
+      <div class="field">
+        <label>Submitted date (optional)</label>
+        <input type="date" id="as-sub-${id}" value="${prefill && prefill.sub ? prefill.sub : ''}">
+      </div>
+      <button class="remove-btn" onclick="document.getElementById('as-${id}').remove()">Remove</button>
+    </div>`;
+  document.getElementById('assignmentList').appendChild(div);
+}
+
+// Start with two blank assignment rows and no blackout rows
+addAssignment(); addAssignment();
+
+function toDate(s){ if(!s) return null; const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function fmt(d){ return d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}); }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function isWeekday(d){ const day = d.getDay(); return day!==0 && day!==6; }
+
+function isBlackout(d, ranges){
+  for(const r of ranges){ if(d>=r[0] && d<=r[1]) return true; }
+  return false;
+}
+
+function isUsable(d, ranges){ return isWeekday(d) && !isBlackout(d, ranges); }
+
+// list of usable days strictly between from (exclusive) and to (inclusive)
+function usableDaysBetween(from, to, ranges){
+  const out=[];
+  let cur = addDays(from,1);
+  while(cur <= to){
+    if(isUsable(cur, ranges)) out.push(new Date(cur));
+    cur = addDays(cur,1);
+  }
+  return out;
+}
+
+function buildSchedule(){
+  document.getElementById('errorBox').textContent = '';
+  const courseName = document.getElementById('courseName').value.trim() || 'Untitled course';
+  const startDate = toDate(document.getElementById('startDate').value);
+  const finishDate = toDate(document.getElementById('finishDate').value);
+  const buffer = parseInt(document.getElementById('buffer').value) || 0;
+
+  if(!startDate || !finishDate){
+    document.getElementById('errorBox').textContent = 'Start date and target finish date are both needed.';
+    return;
+  }
+  if(finishDate <= startDate){
+    document.getElementById('errorBox').textContent = 'Target finish date must be after the start date.';
+    return;
+  }
+
+  const blackoutRanges = [];
+  document.querySelectorAll('#blackoutList .item-card').forEach(card=>{
+    const s = card.querySelector('input[id^="bo-start-"]').value;
+    const e = card.querySelector('input[id^="bo-end-"]').value;
+    if(s && e){ blackoutRanges.push([toDate(s), toDate(e)]); }
+  });
+
+  const assignments = [];
+  document.querySelectorAll('#assignmentList .item-card').forEach(card=>{
+    const name = card.querySelector('input[id^="as-name-"]').value.trim();
+    const topics = parseInt(card.querySelector('input[id^="as-topics-"]').value);
+    const sub = card.querySelector('input[id^="as-sub-"]').value;
+    if(name && topics){
+      assignments.push({ name, topics, submitted: sub ? toDate(sub) : null });
+    }
+  });
+
+  if(assignments.length===0){
+    document.getElementById('errorBox').textContent = 'Add at least one assignment with a name and topic count.';
+    return;
+  }
+
+  const anchored = assignments.filter(a=>a.submitted).sort((a,b)=>a.submitted-b.submitted);
+  const remaining = assignments.filter(a=>!a.submitted);
+
+  // Baseline pace from anchored assignments
+  let cursor = startDate;
+  let totalDays = 0, totalTopics = 0;
+  anchored.forEach(a=>{
+    const usable = usableDaysBetween(cursor, a.submitted, blackoutRanges);
+    a._daysUsed = usable.length;
+    a._pace = a.topics>0 ? usable.length / a.topics : null;
+    totalDays += usable.length;
+    totalTopics += a.topics;
+    cursor = a.submitted;
+  });
+  const baselinePace = totalTopics>0 ? (totalDays/totalTopics) : null;
+
+  // Scheduling window for remaining work
+  const windowStart = cursor; // last anchor or start date
+  const allUsable = usableDaysBetween(windowStart, finishDate, blackoutRanges);
+  const bufferDays = Math.min(buffer, allUsable.length);
+  const schedulableDays = allUsable.slice(0, allUsable.length - bufferDays);
+  const bufferZoneDays = allUsable.slice(allUsable.length - bufferDays);
+
+  const totalTopicsRemaining = remaining.reduce((s,a)=>s+a.topics,0);
+  const daysPerTopic = totalTopicsRemaining>0 ? schedulableDays.length / totalTopicsRemaining : 0;
+
+  let idx = 0;
+  const scheduled = [];
+  remaining.forEach((a, i)=>{
+    let allotted = Math.max(1, Math.round(a.topics * daysPerTopic));
+    idx += allotted;
+    let dueIdx = Math.min(idx, schedulableDays.length) - 1;
+    if(dueIdx < 0) dueIdx = 0;
+    const overflow = idx > schedulableDays.length;
+    const dueDate = schedulableDays.length>0 ? schedulableDays[Math.min(dueIdx, schedulableDays.length-1)] : finishDate;
+    const actualPace = allotted / a.topics;
+    const flagged = baselinePace!==null && actualPace < baselinePace * 0.8;
+    scheduled.push({ name:a.name, topics:a.topics, allotted, pace:actualPace, dueDate, flagged: flagged || overflow, overflow });
+  });
+
+  renderOutput({courseName, startDate, finishDate, buffer, blackoutRanges, anchored, scheduled, baselinePace, schedulableCount:schedulableDays.length, bufferZoneDays});
+}
+
+function renderOutput(d){
+  document.getElementById('outputSection').style.display = 'block';
+  document.getElementById('paceSection').style.display = 'block';
+  document.getElementById('tableSection').style.display = 'block';
+
+  document.getElementById('rulerTitle').textContent = d.courseName;
+  document.getElementById('rulerSub').textContent = `${fmt(d.startDate)} to ${fmt(d.finishDate)}`;
+
+  if(d.baselinePace!==null){
+    document.getElementById('paceLine').innerHTML = `Pace so far: <b>${d.baselinePace.toFixed(2)} usable days per topic</b>, based on ${d.anchored.length} submitted assignment${d.anchored.length===1?'':'s'}.`;
+  } else {
+    document.getElementById('paceLine').innerHTML = `No submitted assignments yet, so there is no pace baseline. Risk flags cannot be raised until at least one assignment has a submitted date.`;
+  }
+  document.getElementById('availLine').innerHTML = `Usable days remaining for scheduling: <b>${d.schedulableCount}</b> across <b>${d.scheduled.length}</b> assignment${d.scheduled.length===1?'':'s'}, plus a ${d.buffer}-day buffer before the deadline.`;
+
+  // Table
+  const body = document.getElementById('scheduleBody');
+  body.innerHTML = '';
+  d.anchored.forEach(a=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${a.name}</td><td>${a.topics}</td><td><span class="anchor-pill">submitted</span></td><td>${fmt(a.submitted)}</td><td>${a._daysUsed}</td><td>${a._pace!==null?a._pace.toFixed(2):'—'}</td>`;
+    body.appendChild(tr);
+  });
+  d.scheduled.forEach(a=>{
+    const tr = document.createElement('tr');
+    if(a.flagged) tr.className='flagged';
+    const status = a.overflow ? '<span class="flag-pill">exceeds buffer</span>' : (a.flagged ? '<span class="flag-pill">pacing risk</span>' : 'scheduled');
+    tr.innerHTML = `<td>${a.name}</td><td>${a.topics}</td><td>${status}</td><td>${fmt(a.dueDate)}</td><td>${a.allotted}</td><td>${a.pace.toFixed(2)}</td>`;
+    body.appendChild(tr);
+  });
+
+  drawRuler(d);
+  document.getElementById('outputSection').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function drawRuler(d){
+  const totalMs = d.finishDate - d.startDate;
+  const W = 860, H = 130, pad = 20;
+  const trackY = 60, trackH = 16;
+  const x = (date)=> pad + ((date - d.startDate)/totalMs) * (W - pad*2);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  // base track
+  svg += `<rect x="${pad}" y="${trackY}" width="${W-pad*2}" height="${trackH}" rx="8" fill="#E7E3D6" stroke="#D8D3C4"/>`;
+
+  // blackout bands
+  d.blackoutRanges.forEach(r=>{
+    const x1 = Math.max(pad, x(r[0]<d.startDate?d.startDate:r[0]));
+    const x2 = Math.min(W-pad, x(r[1]>d.finishDate?d.finishDate:r[1]));
+    if(x2>x1){
+      svg += `<rect x="${x1}" y="${trackY}" width="${x2-x1}" height="${trackH}" fill="url(#hatch)" stroke="#B8B3A2"/>`;
+    }
+  });
+
+  // buffer zone
+  if(d.bufferZoneDays.length>0){
+    const bStart = x(d.bufferZoneDays[0]);
+    svg += `<rect x="${bStart}" y="${trackY}" width="${(W-pad)-bStart}" height="${trackH}" fill="url(#hatch)" stroke="#B8B3A2"/>`;
+  }
+
+  // week ticks
+  let wk = new Date(d.startDate);
+  while(wk <= d.finishDate){
+    const tx = x(wk);
+    svg += `<line x1="${tx}" y1="${trackY-4}" x2="${tx}" y2="${trackY+trackH+4}" stroke="#C9C4B4" stroke-width="1"/>`;
+    wk = addDays(wk, 7);
+  }
+
+  // start / finish labels
+  svg += `<text x="${pad}" y="${trackY+trackH+22}" font-family="Inter" font-size="11" fill="#6B6A63">${fmt(d.startDate)}</text>`;
+  svg += `<text x="${W-pad}" y="${trackY+trackH+22}" font-family="Inter" font-size="11" text-anchor="end" fill="#6B6A63">${fmt(d.finishDate)}</text>`;
+
+  // anchored pins (solid navy)
+  d.anchored.forEach(a=>{
+    const px = x(a.submitted);
+    svg += pin(px, trackY, '#1F497D');
+  });
+
+  // scheduled pins (blue or terracotta if flagged), sized loosely by topic count via radius
+  d.scheduled.forEach(a=>{
+    const px = x(a.dueDate);
+    const colour = a.flagged ? '#B4503C' : '#4F81BD';
+    svg += pin(px, trackY, colour, Math.min(7, 4 + a.topics*0.3));
+  });
+
+  svg += `<defs><pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="6" stroke="#B8B3A2" stroke-width="2"/>
+  </pattern></defs>`;
+
+  svg += `</svg>`;
+  document.getElementById('rulerSvgHolder').innerHTML = svg;
+}
+
+function pin(px, trackY, colour, r){
+  r = r || 6;
+  const topY = trackY - 14;
+  return `<line x1="${px}" y1="${topY}" x2="${px}" y2="${trackY}" stroke="${colour}" stroke-width="1.5"/>
+          <circle cx="${px}" cy="${topY}" r="${r}" fill="${colour}"/>`;
+}
+</script>
+</body>
+</html>
